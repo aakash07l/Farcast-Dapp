@@ -13,7 +13,7 @@ export const metadata: Metadata = {
         action: {
           type: "launch_frame",
           name: "Web3 Browser",
-          url: "https://PROJECT_URL_HERE.vercel.app", // Yahan apna Vercel Link dalna baad me
+          url: "https://farcast-dapp.vercel.app", // Yahan apna Vercel Link dalna baad me
           splashImageUrl: "https://placehold.co/200x200/1a1a1a/purple?text=Loading...",
           splashBackgroundColor: "#1a1a1a",
         },
