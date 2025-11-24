@@ -6,11 +6,11 @@
   },
   "frame": {
     "version": "1",
-    "name": "Example Frame",
+    "name": "Farcaster-Dapp",
     "iconUrl": "https://farcast-dapp.vercel.app/icon.png",
     "homeUrl": "https://farcast-dapp.vercel.app",
     "imageUrl": "https://farcast-dapp.vercel.app/image.png",
-    "buttonTitle": "Check this out",
+    "buttonTitle": "Open Mini App",
     "splashImageUrl": "https://farcast-dapp.vercel.app/splash.png",
     "splashBackgroundColor": "#eeccff",
     "webhookUrl": "https://farcast-dapp.vercel.app/api/webhook"
