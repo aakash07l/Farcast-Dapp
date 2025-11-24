@@ -7,11 +7,11 @@ export default function Home() {
   const [url, setUrl] = useState("");
   const [isLoaded, setIsLoaded] = useState(false);
 
+  // SDK Initialize
   useEffect(() => {
     const load = async () => {
       try {
-        // Frame SDK ready hone ka wait
-        await sdk.actions.ready(); 
+        await sdk.actions.ready();
       } catch (err) {
         console.log("SDK Error:", err);
       }
@@ -30,48 +30,63 @@ export default function Home() {
     }
 
     try {
-      // Farcaster native method to open URL
-      sdk.actions.openUrl(target);
+      // CHANGE: SDK ke bajaye seedha window location change kar rahe hain.
+      // Ye current page ko replace karke target URL load karega (In-App).
+      window.location.href = target;
+      
     } catch (e) {
-      // Fallback for testing in normal browser
-      window.open(target, "_blank");
+      console.error("Navigation failed", e);
+      // Fallback: Agar direct navigation fail ho jaye
+      sdk.actions.openUrl(target);
     }
   }, [url]);
 
-  if (!isLoaded) return <div className="flex h-screen items-center justify-center">Loading...</div>;
+  if (!isLoaded) return <div className="flex h-screen items-center justify-center text-white">Loading Frame...</div>;
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-black text-white p-4">
-      <div className="w-full max-w-md space-y-6 border border-gray-800 p-6 rounded-2xl bg-gray-900">
+      <div className="w-full max-w-md space-y-6 border border-gray-800 p-6 rounded-2xl bg-gray-900 shadow-xl">
         
-        <h1 className="text-2xl font-bold text-center text-purple-400">
-          Dapp Browser
-        </h1>
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-purple-400 mb-1">
+            Crypto Browser
+          </h1>
+          <p className="text-xs text-gray-500">Connect Wallet & Trade inside Farcaster</p>
+        </div>
         
+        {/* Input Box */}
         <div className="space-y-2">
-          <label className="text-sm text-gray-400">Enter dApp URL</label>
-          <input
-            type="text"
-            placeholder="uniswap.org"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            className="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 text-white focus:border-purple-500 outline-none"
-          />
+          <label className="text-sm text-gray-400">Website URL</label>
+          <div className="relative flex items-center">
+             <span className="absolute left-3 text-gray-500 text-sm">🌐</span>
+             <input
+                type="text"
+                placeholder="e.g. app.uniswap.org"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                className="w-full pl-10 p-3 rounded-lg bg-gray-800 border border-gray-700 text-white focus:border-purple-500 outline-none"
+              />
+          </div>
         </div>
 
+        {/* Popular Dapps Quick Links */}
         <div className="grid grid-cols-3 gap-2">
-           {/* Quick Links buttons for ease */}
-           <button onClick={() => setUrl("app.uniswap.org")} className="text-xs bg-gray-800 p-2 rounded hover:bg-gray-700">Uniswap</button>
-           <button onClick={() => setUrl("zora.co")} className="text-xs bg-gray-800 p-2 rounded hover:bg-gray-700">Zora</button>
-           <button onClick={() => setUrl("opensea.io")} className="text-xs bg-gray-800 p-2 rounded hover:bg-gray-700">OpenSea</button>
+           <button onClick={() => setUrl("app.uniswap.org")} className="text-xs bg-gray-800 border border-gray-700 p-2 rounded hover:bg-gray-700 transition">🦄 Uniswap</button>
+           <button onClick={() => setUrl("jumper.exchange")} className="text-xs bg-gray-800 border border-gray-700 p-2 rounded hover:bg-gray-700 transition">🌉 Jumper</button>
+           <button onClick={() => setUrl("opensea.io")} className="text-xs bg-gray-800 border border-gray-700 p-2 rounded hover:bg-gray-700 transition">🌊 OpenSea</button>
         </div>
 
+        {/* Main Action Button */}
         <button
           onClick={handleOpen}
-          className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-lg transition-colors"
+          className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-3 rounded-lg transition-all shadow-lg shadow-purple-900/20"
         >
-          Go to App ↗
+          Launch Inside App 🚀
         </button>
+
+        <div className="text-[10px] text-gray-600 text-center mt-4">
+          Note: Press the 'Back' button in Farcaster header to return to this browser.
+        </div>
       </div>
     </div>
   );
