@@ -1,0 +1,18 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjIzNDYyMiwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweGMxMEEyNDVlNzhGQzI5RGI4ZWEzYjliZDJlYTM1ZUU2MmM3Y0M5OUEifQ",
+    "payload": "eyJkb21haW4iOiJmYXJjYXN0LWRhcHAudmVyY2VsLmFwcCJ9",
+    "signature": "SeTWK7hll6FbzBH4FxxBiYC2k77C8BiWSeAeeQSbX2hVj9sHpjzxS2uSOaB1onFYoQf4mpSu/Go8SpfpZSfAjhw="
+  },
+  "frame": {
+    "version": "1",
+    "name": "Example Frame",
+    "iconUrl": "https://farcast-dapp.vercel.app/icon.png",
+    "homeUrl": "https://farcast-dapp.vercel.app",
+    "imageUrl": "https://farcast-dapp.vercel.app/image.png",
+    "buttonTitle": "Check this out",
+    "splashImageUrl": "https://farcast-dapp.vercel.app/splash.png",
+    "splashBackgroundColor": "#eeccff",
+    "webhookUrl": "https://farcast-dapp.vercel.app/api/webhook"
+  }
+}
