@@ -63,7 +63,7 @@ export default function Home() {
       <div className="flex justify-between items-center p-4 border-b border-gray-800 bg-gray-900/50 backdrop-blur-md sticky top-0 z-10">
         <div className="flex items-center gap-2">
            <span className="text-xl">🌐</span>
-           <span className="font-bold text-sm text-gray-200">Web3 Browser</span>
+           <span className="font-bold text-sm text-gray-200">Far Browser</span>
         </div>
 
         {/* --- ADD BUTTON --- */}
@@ -86,9 +86,9 @@ export default function Home() {
             
             <div className="text-center space-y-2">
               <h1 className="text-3xl font-bold bg-gradient-to-br from-white to-gray-500 text-transparent bg-clip-text">
-                Browse & Connect
+                Browse Any DApp
               </h1>
-              <p className="text-xs text-gray-500">Access any dApp with internal wallet support</p>
+              <p className="text-xs text-gray-500">Access any dApp with external wallet support</p>
             </div>
             
             <div className="space-y-2">
