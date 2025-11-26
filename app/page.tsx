@@ -141,7 +141,7 @@ export default function Home() {
               <div className="space-y-2">
                 <div className="bg-gray-800 p-3 rounded-lg border border-gray-700 flex items-center gap-3">
                   <span className="text-green-500">✅</span>
-                  <span className="font-bold text-white">Coinbase Wallet</span>
+                  <span className="font-bold text-white">Rainbow Wallet</span>
                 </div>
                 <div className="bg-gray-800 p-3 rounded-lg border border-gray-700 flex items-center gap-3">
                   <span className="text-yellow-500">✅</span>
