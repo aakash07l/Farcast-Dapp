@@ -1,5 +1,5 @@
 // 1. Apna Token/Contract Address yaha daalo (Base Chain)
-export const CONTRACT_ADDRESS = "0x1C55020c22D7e8f4eF8CcC27fE9E342301DAEa93"; 
+export const CONTRACT_ADDRESS = "0x39BF2317CF08c10c7eb54960d146c53D403bC186"; 
 
 // 2. Updated ABI for 'claim' function
 export const CONTRACT_ABI = [
