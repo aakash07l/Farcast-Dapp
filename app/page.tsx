@@ -45,7 +45,7 @@ export default function Home() {
     try {
       const data = encodeFunctionData({
         abi: CONTRACT_ABI,
-        functionName: "mint",
+        functionName: "claim",
         args: [
            "0x0000000000000000000000000000000000000000", 
            parseEther("100") 
