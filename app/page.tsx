@@ -27,7 +27,6 @@ export default function Home() {
     const load = async () => {
       try {
         const context = await sdk.context;
-        // Check karein agar user ne app pehle se add ki hui hai
         if (context?.client?.added) {
           setAdded(true);
         }
@@ -40,46 +39,43 @@ export default function Home() {
     load();
   }, []);
 
-  // --- REWARD CLAIM FUNCTION (Uses Warplet / Native Wallet) ---
+  // --- REWARD CLAIM FUNCTION ---
   const handleClaimReward = async () => {
-    // Debug Alert: Start
-    alert("Starting Claim Process...");
-
     setClaiming(true);
     try {
-      // Feature Check
+      // Feature Check (Silently fail or log if not supported to avoid spamming alerts)
       if (!(sdk.actions as any).ethSendTransaction) {
-        alert("Error: Wallet feature not found. Please use Warpcast Mobile App.");
+        alert("Error: This feature requires Warpcast Mobile App.");
         setClaiming(false);
         return;
       }
 
-      // 1. Transaction Data Encode karna (Viem use karke)
-      // Function name 'claim' kar diya hai tumhare contract ke hisaab se
+      // 1. Prepare Transaction Data
       const data = encodeFunctionData({
         abi: CONTRACT_ABI,
         functionName: "claim", 
         args: [
-           "0x0000000000000000000000000000000000000000", // Placeholder (Contract handle karega msg.sender)
-           parseEther("100") // Amount to claim (100 tokens)
+           "0x0000000000000000000000000000000000000000", // Contract will replace with msg.sender
+           parseEther("100") // Amount
         ], 
       });
 
-      // 2. Trigger Transaction via Farcaster Native Wallet
-      // Chain ID: 8453 (Base)
+      // 2. Send Transaction
       const result = await (sdk.actions as any).ethSendTransaction({
-        chainId: "eip155:8453", 
+        chainId: "eip155:8453", // Base Chain
         data: data,
         to: CONTRACT_ADDRESS,
         value: "0", 
       });
 
-      alert(`Success! Transaction Sent.`);
+      // Sirf Success hone par ye aayega
+      alert(`Success! Reward Claimed.`);
       console.log("Tx Hash:", result);
 
     } catch (error: any) {
       console.error("Claim Failed:", error);
-      alert(`Claim Failed: ${error.message || "User rejected or Error"}`); 
+      // Agar user reject kare ya error aaye tabhi ye dikhega
+      alert(`Claim Failed: ${error.message || "User Rejected"}`);
     } finally {
       setClaiming(false);
     }
@@ -91,7 +87,7 @@ export default function Home() {
       const result = await sdk.actions.addFrame();
       if (result) setAdded(true);
     } catch (error) {
-      console.log("Add frame not supported in this env");
+      // Silent catch
     }
   }, []);
 
@@ -107,7 +103,6 @@ export default function Home() {
       target = `https://${target}`;
     }
     try {
-      // Force navigation inside the webview (Crucial for keeping context)
       window.location.href = target;
     } catch (e) {
       sdk.actions.openUrl(target);
@@ -123,7 +118,7 @@ export default function Home() {
   return (
     <div className="flex min-h-screen flex-col bg-[#0f172a] text-white font-sans selection:bg-purple-500/30">
       
-      {/* --- HEADER --- */}
+      {/* HEADER */}
       <div className="flex justify-between items-center p-4 border-b border-white/5 bg-[#0f172a]/80 backdrop-blur-md sticky top-0 z-20">
         <div className="flex items-center gap-2">
            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
@@ -147,10 +142,10 @@ export default function Home() {
         )}
       </div>
 
-      {/* --- CONTENT --- */}
+      {/* CONTENT */}
       <div className="flex-1 flex flex-col items-center p-6 animate-fade-in max-w-lg mx-auto w-full space-y-6">
         
-        {/* --- REWARD CARD (TOP SECTION) --- */}
+        {/* REWARD CARD */}
         <div className="w-full relative overflow-hidden rounded-2xl p-0.5 bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500 shadow-xl shadow-orange-500/20">
            <div className="bg-[#1e293b] rounded-[14px] p-4 relative">
               <div className="flex items-center justify-between">
@@ -173,20 +168,15 @@ export default function Home() {
 
         {!showGuide && (
           <div className="w-full space-y-6">
-            
-            {/* Hero Section */}
             <div className="text-center space-y-2 pt-2">
               <h1 className="text-3xl font-extrabold tracking-tight">
                 <span className="bg-gradient-to-r from-white via-purple-200 to-purple-400 bg-clip-text text-transparent">
                   Web3 Browser
                 </span>
               </h1>
-              <p className="text-xs text-gray-400 leading-relaxed">
-                Enter URL & connect external wallet
-              </p>
+              <p className="text-xs text-gray-400 leading-relaxed">Enter URL & connect external wallet</p>
             </div>
             
-            {/* Input Section */}
             <div className="relative group">
                <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl opacity-30 group-hover:opacity-60 transition duration-500 blur-sm"></div>
                <div className="relative flex items-center bg-[#1e293b] rounded-2xl border border-white/10 p-1">
@@ -203,7 +193,6 @@ export default function Home() {
                </div>
             </div>
 
-            {/* Quick Links */}
             <div>
               <div className="grid grid-cols-3 gap-3">
                  {[
@@ -211,11 +200,7 @@ export default function Home() {
                    { name: "OpenSea", url: "opensea.io", icon: "🌊" },
                    { name: "Pump.fun", url: "pump.fun", icon: "💊" }
                  ].map((dapp) => (
-                   <button 
-                     key={dapp.name}
-                     onClick={() => setUrl(dapp.url)} 
-                     className="glass flex flex-col items-center justify-center gap-1 p-3 rounded-xl hover:bg-white/10 transition-all hover:border-purple-500/50 group"
-                   >
+                   <button key={dapp.name} onClick={() => setUrl(dapp.url)} className="glass flex flex-col items-center justify-center gap-1 p-3 rounded-xl hover:bg-white/10 transition-all hover:border-purple-500/50 group">
                      <span className="text-xl group-hover:scale-110 transition-transform">{dapp.icon}</span>
                      <span className="text-[10px] font-medium text-gray-300">{dapp.name}</span>
                    </button>
@@ -223,7 +208,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Launch Button */}
             <button
               onClick={handleInitialClick}
               disabled={!url}
@@ -235,59 +219,32 @@ export default function Home() {
             >
               Go to Website <ArrowRight className="w-4 h-4" />
             </button>
-            
           </div>
         )}
       </div>
 
-      {/* --- GUIDE MODAL (IMPORTANT WARNING) --- */}
+      {/* GUIDE MODAL */}
       {showGuide && (
         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-6 backdrop-blur-sm animate-fade-in">
-          <div className="bg-[#1e293b] border border-white/10 p-6 rounded-3xl max-w-sm w-full shadow-2xl relative overflow-hidden">
-            
-            {/* Background Glow */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-purple-600/20 blur-3xl rounded-full -mr-10 -mt-10 pointer-events-none"></div>
-
-            <div className="relative z-10">
-              <div className="flex items-center gap-3 text-purple-400 mb-5">
-                <div className="p-2 bg-purple-500/10 rounded-lg">
-                  <Wallet className="w-6 h-6" />
-                </div>
-                <h2 className="text-lg font-bold text-white">Wallet Connection</h2>
+          <div className="bg-[#1e293b] border border-white/10 p-6 rounded-3xl max-w-sm w-full shadow-2xl relative">
+            <div className="flex items-center gap-3 text-purple-400 mb-5">
+              <Wallet className="w-6 h-6" />
+              <h2 className="text-lg font-bold text-white">Wallet Connection</h2>
+            </div>
+            <div className="space-y-4 text-sm">
+              <p className="text-gray-300 leading-relaxed">Please select <span className="text-white font-bold">Rainbow</span> or <span className="text-white font-bold">Injected Wallet</span> inside the website.</p>
+              <div className="bg-yellow-500/10 border border-yellow-500/20 p-3 rounded-xl flex gap-3">
+                <AlertTriangle className="w-5 h-5 text-yellow-500 shrink-0" />
+                <p className="text-xs text-yellow-200">Native Wallet is for <b>Rewards only</b>. Use external wallet for dApps.</p>
               </div>
-
-              <div className="space-y-4 text-sm">
-                <p className="text-gray-300 leading-relaxed">
-                  Please select <span className="text-white font-bold">Rainbow</span> or <span className="text-white font-bold">Injected Wallet</span> inside the website.
-                </p>
-
-                <div className="bg-yellow-500/10 border border-yellow-500/20 p-3 rounded-xl flex gap-3">
-                  <AlertTriangle className="w-5 h-5 text-yellow-500 shrink-0" />
-                  <p className="text-xs text-yellow-200">
-                    <span className="font-bold">Note:</span> Native Wallet (Warplet) is used for <b>Rewards only</b>. Use external wallet for dApps.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-3 mt-6">
-                <button
-                  onClick={() => setShowGuide(false)}
-                  className="flex-1 text-gray-400 text-sm font-medium py-3 hover:text-white transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleProceed}
-                  className="flex-1 bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200 transition-colors shadow-lg shadow-white/10"
-                >
-                  I Understand
-                </button>
-              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button onClick={() => setShowGuide(false)} className="flex-1 text-gray-400 text-sm">Cancel</button>
+              <button onClick={handleProceed} className="flex-1 bg-white text-black font-bold py-3 rounded-xl">I Understand</button>
             </div>
           </div>
         </div>
       )}
-
     </div>
   );
-}
+                     }
