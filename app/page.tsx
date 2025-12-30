@@ -39,47 +39,62 @@ export default function Home() {
     load();
   }, []);
 
-  // --- REWARD CLAIM FUNCTION ---
+  // --- REWARD CLAIM FUNCTION (DEBUG VERSION) ---
   const handleClaimReward = async () => {
+    // 1. Debug: Check start
+    alert("Claim process started..."); 
+    
     setClaiming(true);
     try {
+      // 2. Check if SDK is ready and function exists
+      if (!(sdk.actions as any).ethSendTransaction) {
+        alert("Error: Wallet feature not supported on this device/browser. Please use Warpcast Mobile.");
+        setClaiming(false);
+        return;
+      }
+
+      // 3. Encoding Data
       const data = encodeFunctionData({
         abi: CONTRACT_ABI,
-        functionName: "claim",
+        functionName: "claim", 
         args: [
            "0x0000000000000000000000000000000000000000", 
            parseEther("100") 
         ], 
       });
 
-      // FIX: 'as any' use kiya hai taaki TypeScript error na de
+      alert("Please confirm transaction in your wallet...");
+
+      // 4. Trigger Transaction
       const result = await (sdk.actions as any).ethSendTransaction({
-        chainId: "eip155:8453", 
+        chainId: "eip155:8453", // Base Chain
         data: data,
         to: CONTRACT_ADDRESS,
         value: "0", 
       });
 
-      alert(`Claim Transaction Sent!`);
+      // 5. Success
+      alert(`Success! Transaction Sent.`);
+      console.log("Tx Result:", result);
 
-    } catch (error) {
+    } catch (error: any) {
+      // 6. Error Catching
       console.error("Claim Failed:", error);
+      alert(`Claim Failed: ${error.message || "Unknown Error"}`);
     } finally {
       setClaiming(false);
     }
   };
 
-  // --- ADD TO SHORTCUTS ---
   const handleAddToFarcaster = useCallback(async () => {
     try {
       const result = await sdk.actions.addFrame();
       if (result) setAdded(true);
     } catch (error) {
-      console.log("Add frame not supported in this env");
+      // alert("Add to frame not supported here"); // Optional
     }
   }, []);
 
-  // --- BROWSER NAVIGATION ---
   const handleInitialClick = () => {
     if (!url) return;
     setShowGuide(true);
@@ -261,4 +276,4 @@ export default function Home() {
 
     </div>
   );
-      }
+            }
