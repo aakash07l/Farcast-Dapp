@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import sdk from "@farcaster/frame-sdk";
-import { Loader2, Wallet, Info, Plus, ArrowLeft } from "lucide-react"; 
+import { Loader2, Wallet, Plus } from "lucide-react"; 
 
 export default function Home() {
   const [url, setUrl] = useState("");
@@ -14,11 +14,11 @@ export default function Home() {
     const load = async () => {
       try {
         const context = await sdk.context;
-        // Check karein agar pehle se added hai (Advanced feature, optional)
+        // Check karein agar pehle se added hai
         if (context?.client?.added) {
           setAdded(true);
         }
-        await sdk.actions.ready();
+        sdk.actions.ready();
       } catch (err) {
         console.log("SDK Error:", err);
       }
@@ -48,13 +48,19 @@ export default function Home() {
       target = `https://${target}`;
     }
     try {
-      window.location.href = target;
+      // Pehle normal window open try karein
+      window.open(target, "_blank");
     } catch (e) {
+      // Fallback Farcaster SDK ke liye
       sdk.actions.openUrl(target);
     }
   }, [url]);
 
-  if (!isLoaded) return <div className="flex h-screen items-center justify-center text-white bg-black"><Loader2 className="animate-spin" /></div>;
+  if (!isLoaded) return (
+    <div className="flex h-screen items-center justify-center text-white bg-black">
+      <Loader2 className="animate-spin w-10 h-10 text-purple-500" />
+    </div>
+  );
 
   return (
     <div className="flex min-h-screen flex-col bg-black text-white font-sans relative">
@@ -66,7 +72,7 @@ export default function Home() {
            <span className="font-bold text-sm text-gray-200">Web3 Browser</span>
         </div>
 
-        {/* --- ADD BUTTON --- */}
+        {/* --- ADD BUTTON (Sirf tab dikhega jab added na ho) --- */}
         {!added && (
           <button 
             onClick={handleAddToFarcaster}
@@ -88,7 +94,7 @@ export default function Home() {
               <h1 className="text-3xl font-bold bg-gradient-to-br from-white to-gray-500 text-transparent bg-clip-text">
                 Browse & Connect
               </h1>
-              <p className="text-xs text-gray-500">Access any dApp with internal wallet support</p>
+              <p className="text-xs text-gray-500">Access any dApp inside Farcaster</p>
             </div>
             
             <div className="space-y-2">
@@ -106,6 +112,7 @@ export default function Home() {
               </div>
             </div>
 
+            {/* Quick Shortcuts */}
             <div className="grid grid-cols-3 gap-3">
                <button onClick={() => setUrl("app.uniswap.org")} className="text-xs bg-gray-800 border border-gray-700 p-3 rounded-lg hover:bg-gray-700 hover:border-purple-500 transition">🦄 Uniswap</button>
                <button onClick={() => setUrl("opensea.io")} className="text-xs bg-gray-800 border border-gray-700 p-3 rounded-lg hover:bg-gray-700 hover:border-blue-500 transition">🌊 OpenSea</button>
@@ -132,26 +139,23 @@ export default function Home() {
             
             <div className="flex items-center gap-3 text-purple-400 border-b border-gray-800 pb-4">
               <Wallet className="w-6 h-6" />
-              <h2 className="text-lg font-bold text-white">Wallet Connection</h2>
+              <h2 className="text-lg font-bold text-white">Opening dApp...</h2>
             </div>
 
             <div className="space-y-4 text-sm text-gray-300">
-              <p>To connect your Farcaster wallet inside the website:</p>
+              <p>For the best experience connecting your wallet:</p>
               
               <div className="space-y-2">
                 <div className="bg-gray-800 p-3 rounded-lg border border-gray-700 flex items-center gap-3">
                   <span className="text-green-500">✅</span>
-                  <span className="font-bold text-white">Coinbase Wallet</span>
+                  <span className="font-bold text-white">Select "Coinbase Wallet"</span>
                 </div>
                 <div className="bg-gray-800 p-3 rounded-lg border border-gray-700 flex items-center gap-3">
                   <span className="text-yellow-500">✅</span>
-                  <span className="font-bold text-white">Browser / Injected</span>
-                </div>
-                 <div className="bg-gray-800/50 p-3 rounded-lg border border-red-900/30 flex items-center gap-3 opacity-70">
-                  <span className="text-red-500">❌</span>
-                  <span className="text-gray-400">WalletConnect (Avoid)</span>
+                  <span className="font-bold text-white">Select "Browser Wallet"</span>
                 </div>
               </div>
+              <p className="text-xs text-gray-500 italic">Do not select WalletConnect inside the internal browser.</p>
             </div>
 
             <div className="flex gap-3 pt-2">
@@ -165,7 +169,7 @@ export default function Home() {
                 onClick={handleProceed}
                 className="flex-1 bg-purple-600 text-white font-bold py-3 rounded-xl hover:bg-purple-700 transition-colors"
               >
-                Open Site
+                Go to Site
               </button>
             </div>
           </div>
