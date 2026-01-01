@@ -8,18 +8,18 @@ import {
   Plus, 
   Check, 
   Search, 
-  AlertTriangle, 
   Wallet, 
-  ArrowRight, 
   Gift 
 } from "lucide-react"; 
 import { encodeFunctionData } from "viem";
-import { CONTRACT_ADDRESS, CONTRACT_ABI } from "./contract";
+
+// 1. FILES IMPORT (Ensure ye dono files app folder me ho)
+import { CONTRACT_ADDRESS } from "./contract"; // Address wali file
+import contractABI from "./contract.json";     // ABI wali file (Jo tumne paste kiya)
 
 export default function Home() {
   const [url, setUrl] = useState("");
   const [isLoaded, setIsLoaded] = useState(false);
-  const [showGuide, setShowGuide] = useState(false);
   const [added, setAdded] = useState(false);
   const [claiming, setClaiming] = useState(false);
 
@@ -27,9 +27,7 @@ export default function Home() {
     const load = async () => {
       try {
         const context = await sdk.context;
-        if (context?.client?.added) {
-          setAdded(true);
-        }
+        if (context?.client?.added) setAdded(true);
         await sdk.actions.ready();
       } catch (err) {
         console.error("SDK Error:", err);
@@ -39,41 +37,53 @@ export default function Home() {
     load();
   }, []);
 
-  // --- REWARD CLAIM FUNCTION ---
+  // --- MAIN CLAIM LOGIC ---
   const handleClaimReward = async () => {
     setClaiming(true);
     try {
-      // 1. Transaction Data (Arguments empty for your custom contract)
+      // 1. Check if Wallet Action is supported
+      if (!(sdk.actions as any).ethSendTransaction) {
+        alert("Error: Feature requires Warpcast Mobile App.");
+        setClaiming(false);
+        return;
+      }
+
+      // 2. Prepare Data (Using your ABI)
+      // claim() function has no arguments in your ABI
       const data = encodeFunctionData({
-        abi: CONTRACT_ABI,
+        abi: contractABI,
         functionName: "claim",
         args: [], 
       });
 
-      // 2. Send Transaction
-      // FIX: '(sdk.actions as any)' lagaya hai taaki TypeScript error na de
+      // 3. Send Transaction
       const result = await (sdk.actions as any).ethSendTransaction({
-        chainId: "eip155:8453", // Base Chain
+        chainId: "eip155:8453", // Base Chain ID
         data: data,
         to: CONTRACT_ADDRESS,
         value: "0", 
       });
 
-      alert(`Claim Submitted! Transaction Hash: ${result}`);
+      alert(`Success! Tokens Claimed.`);
+      console.log("Tx Hash:", result);
 
     } catch (error: any) {
       console.error("Claim Failed:", error);
+      
+      // Error handling for cooldown
       if (error.message?.includes("Wait 24h")) {
         alert("Failed: You can only claim once every 24 hours.");
+      } else if (error.message?.includes("User rejected")) {
+        alert("Transaction Cancelled.");
       } else {
-        alert(`Claim Failed: ${error.message || "Unknown Error"}`);
+        alert("Claim Failed. Make sure contract has funds.");
       }
     } finally {
       setClaiming(false);
     }
   };
 
-  // --- ADD TO SHORTCUTS ---
+  // --- ADD APP SHORTCUT ---
   const handleAddToFarcaster = useCallback(async () => {
     try {
       const result = await sdk.actions.addFrame();
@@ -81,13 +91,10 @@ export default function Home() {
     } catch (error) { }
   }, []);
 
-  // --- BROWSER NAVIGATION ---
+  // --- BROWSER LOGIC ---
   const handleInitialClick = () => {
     if (!url) return;
-    setShowGuide(true);
-  };
-
-  const handleProceed = useCallback(() => {
+    // Direct open logic
     let target = url.trim();
     if (!target.startsWith("http")) target = `https://${target}`;
     try {
@@ -95,7 +102,7 @@ export default function Home() {
     } catch (e) {
       sdk.actions.openUrl(target);
     }
-  }, [url]);
+  };
 
   if (!isLoaded) return (
     <div className="flex h-screen items-center justify-center bg-[#0f172a] text-white">
@@ -109,23 +116,19 @@ export default function Home() {
       {/* HEADER */}
       <div className="flex justify-between items-center p-4 border-b border-white/5 bg-[#0f172a]/80 backdrop-blur-md sticky top-0 z-20">
         <div className="flex items-center gap-2">
-           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
+           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center shadow-lg">
              <Globe className="w-4 h-4 text-white" />
            </div>
-           <span className="font-bold text-sm tracking-wide hidden sm:block">dApp Browser</span>
+           <span className="font-bold text-sm tracking-wide">dApp Browser</span>
         </div>
-        {!added ? (
-          <button onClick={handleAddToFarcaster} className="flex items-center gap-1.5 bg-white/10 border border-white/10 px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-white/20 transition-all active:scale-95">
+        {!added && (
+          <button onClick={handleAddToFarcaster} className="flex items-center gap-1.5 bg-white/10 border border-white/10 px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-white/20 transition-all">
             <Plus className="w-3 h-3" /> Add App
           </button>
-        ) : (
-          <span className="flex items-center gap-1 text-green-400 text-xs font-medium bg-green-500/10 px-3 py-1 rounded-full border border-green-500/20">
-            <Check className="w-3 h-3" /> Added
-          </span>
         )}
       </div>
 
-      {/* CONTENT */}
+      {/* BODY */}
       <div className="flex-1 flex flex-col items-center p-6 animate-fade-in max-w-lg mx-auto w-full space-y-6">
         
         {/* REWARD CARD */}
@@ -149,20 +152,18 @@ export default function Home() {
            </div>
         </div>
 
-        {!showGuide && (
-          <div className="w-full space-y-6">
+        {/* BROWSER INPUT */}
+        <div className="w-full space-y-6">
             <div className="text-center space-y-2 pt-2">
               <h1 className="text-3xl font-extrabold tracking-tight">
                 <span className="bg-gradient-to-r from-white via-purple-200 to-purple-400 bg-clip-text text-transparent">
                   Web3 Browser
                 </span>
               </h1>
-              <p className="text-xs text-gray-400 leading-relaxed">Enter URL & connect external wallet</p>
+              <p className="text-xs text-gray-400">Enter URL & connect external wallet</p>
             </div>
             
-            <div className="relative group">
-               <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl opacity-30 group-hover:opacity-60 transition duration-500 blur-sm"></div>
-               <div className="relative flex items-center bg-[#1e293b] rounded-2xl border border-white/10 p-1">
+            <div className="relative flex items-center bg-[#1e293b] rounded-2xl border border-white/10 p-1">
                  <div className="pl-4 text-gray-500"><Search className="w-5 h-5" /></div>
                  <input
                     type="text"
@@ -171,11 +172,9 @@ export default function Home() {
                     onChange={(e) => setUrl(e.target.value)}
                     className="w-full p-3 bg-transparent text-white outline-none placeholder-gray-500 text-sm"
                   />
-               </div>
             </div>
 
-            <div>
-              <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-3">
                  {[
                    { name: "Uniswap", url: "app.uniswap.org", icon: "🦄" },
                    { name: "OpenSea", url: "opensea.io", icon: "🌊" },
@@ -186,44 +185,19 @@ export default function Home() {
                      <span className="text-[10px] font-medium text-gray-300">{dapp.name}</span>
                    </button>
                  ))}
-              </div>
             </div>
 
             <button
               onClick={handleInitialClick}
               disabled={!url}
               className={`w-full py-4 rounded-xl font-bold text-base transition-all flex items-center justify-center gap-2 shadow-xl ${
-                url ? "bg-gradient-to-r from-purple-600 to-blue-600 hover:scale-[1.02] text-white shadow-purple-900/20" : "bg-gray-800 text-gray-500 cursor-not-allowed border border-white/5"
+                url ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white" : "bg-gray-800 text-gray-500 cursor-not-allowed"
               }`}
             >
-              Go to Website <ArrowRight className="w-4 h-4" />
+              Go to Website
             </button>
-          </div>
-        )}
-      </div>
-
-      {/* GUIDE MODAL */}
-      {showGuide && (
-        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-6 backdrop-blur-sm animate-fade-in">
-          <div className="bg-[#1e293b] border border-white/10 p-6 rounded-3xl max-w-sm w-full shadow-2xl relative">
-            <div className="flex items-center gap-3 text-purple-400 mb-5">
-              <Wallet className="w-6 h-6" />
-              <h2 className="text-lg font-bold text-white">Wallet Connection</h2>
-            </div>
-            <div className="space-y-4 text-sm">
-              <p className="text-gray-300 leading-relaxed">Please select <span className="text-white font-bold">Rainbow</span> or <span className="text-white font-bold">Injected Wallet</span> inside the website.</p>
-              <div className="bg-yellow-500/10 border border-yellow-500/20 p-3 rounded-xl flex gap-3">
-                <AlertTriangle className="w-5 h-5 text-yellow-500 shrink-0" />
-                <p className="text-xs text-yellow-200">Native Wallet is for <b>Rewards only</b>. Use external wallet for dApps.</p>
-              </div>
-            </div>
-            <div className="flex gap-3 mt-6">
-              <button onClick={() => setShowGuide(false)} className="flex-1 text-gray-400 text-sm">Cancel</button>
-              <button onClick={handleProceed} className="flex-1 bg-white text-black font-bold py-3 rounded-xl">I Understand</button>
-            </div>
-          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
