@@ -88,7 +88,7 @@ export default function Home() {
     if (!identity) return;
     
     // Message jo post hoga
-    const text = `🔮 My Farcaster Vibe Check:\n\n✨ Role: ${identity}\n🍀 Luck: ${luck}%\n\nCheck yours on the Web3 Browser Frame! 👇`;
+    const text = `🔮 My Farcaster Vibe Check:\n\n✨ Role: ${identity}\n🍀 Luck: ${luck}%\n\nCheck yours on the Farcaster Dapp! 👇 https://farcaster.xyz/miniapps/JBsNzJpmBJlk/farcaster-dapp`;
     
     // URL Encode karke link banana
     const encodedText = encodeURIComponent(text);
