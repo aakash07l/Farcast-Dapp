@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import sdk from "@farcaster/frame-sdk";
-import { Loader2, Wallet, Plus, Sparkles, Zap, X } from "lucide-react"; 
+import { Loader2, Wallet, Plus, Sparkles, Zap, X, Share } from "lucide-react"; 
 
 export default function Home() {
   // --- EXISTING STATES (Browser Logic) ---
@@ -64,8 +64,8 @@ export default function Home() {
   // --- FUNCTION 3: Vibe Check Logic ---
   const generateIdentity = () => {
     setLoadingVibe(true);
-    setIdentity(null);
-    setLuck(null);
+    setIdentity(null); // Clear old result
+    
     setTimeout(() => {
       const roles = [
         "Based Builder 🛠️", 
@@ -74,12 +74,28 @@ export default function Home() {
         "Degen King 👑", 
         "Gas Fee Donor ⛽",
         "Normie 😐",
-        "Reply Guy 💬"
+        "Reply Guy 💬",
+        "Frame Wizard 🧙‍♂️"
       ];
       setIdentity(roles[Math.floor(Math.random() * roles.length)]);
       setLuck(Math.floor(Math.random() * 100) + 1);
       setLoadingVibe(false);
     }, 1000);
+  };
+
+  // --- FUNCTION 4: Share to Warpcast ---
+  const handleShare = () => {
+    if (!identity) return;
+    
+    // Message jo post hoga
+    const text = `🔮 My Farcaster Vibe Check:\n\n✨ Role: ${identity}\n🍀 Luck: ${luck}%\n\nCheck yours on the Web3 Browser Frame! 👇`;
+    
+    // URL Encode karke link banana
+    const encodedText = encodeURIComponent(text);
+    const shareUrl = `https://warpcast.com/~/compose?text=${encodedText}`;
+    
+    // Open Warpcast
+    sdk.actions.openUrl(shareUrl);
   };
 
   if (!isLoaded) return (
@@ -94,16 +110,16 @@ export default function Home() {
       {/* HEADER BAR */}
       <div className="flex justify-between items-center p-4 border-b border-gray-800 bg-gray-900/50 backdrop-blur-md sticky top-0 z-10">
         
-        {/* Left Side: Title */}
+        {/* Left Side */}
         <div className="flex items-center gap-2">
            <span className="text-xl">🌐</span>
            <span className="font-bold text-sm text-gray-200 hidden sm:block">Web3 Browser</span>
         </div>
 
-        {/* Center/Right: Action Buttons */}
+        {/* Right Side Buttons */}
         <div className="flex gap-3">
           
-          {/* --- NEW VIBE CHECK BUTTON --- */}
+          {/* Vibe Check Button */}
           <button 
             onClick={() => setShowVibe(true)}
             className="flex items-center gap-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white border border-white/10 px-3 py-1.5 rounded-full text-xs font-bold hover:opacity-90 transition-all shadow-lg shadow-purple-900/20"
@@ -112,7 +128,7 @@ export default function Home() {
             Vibe Check
           </button>
 
-          {/* Add App Button (Sirf tab dikhega jab added na ho) */}
+          {/* Add App Button */}
           {!added && (
             <button 
               onClick={handleAddToFarcaster}
@@ -203,7 +219,7 @@ export default function Home() {
             {/* Close Button */}
             <button 
               onClick={() => setShowVibe(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white bg-slate-800 p-1 rounded-full"
+              className="absolute top-4 right-4 text-slate-400 hover:text-white bg-slate-800 p-1 rounded-full z-10"
             >
               <X className="w-5 h-5" />
             </button>
@@ -232,17 +248,44 @@ export default function Home() {
                )}
             </div>
 
-            <button
-              onClick={generateIdentity}
-              disabled={loadingVibe}
-              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 py-3 rounded-xl font-bold text-white hover:opacity-90 transition-all active:scale-95 shadow-lg shadow-purple-900/30"
-            >
-              {loadingVibe ? "Scanning Blockchain..." : "Reveal Identity 🎲"}
-            </button>
+            {/* ACTION BUTTONS */}
+            <div className="space-y-3">
+              
+              {!identity ? (
+                // State 1: Jab result na ho -> Sirf Reveal Button
+                <button
+                  onClick={generateIdentity}
+                  disabled={loadingVibe}
+                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 py-3 rounded-xl font-bold text-white hover:opacity-90 transition-all active:scale-95 shadow-lg shadow-purple-900/30"
+                >
+                  {loadingVibe ? "Scanning Blockchain..." : "Reveal Identity 🎲"}
+                </button>
+              ) : (
+                // State 2: Jab result aa jaye -> Share aur Try Again button
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={handleShare}
+                    className="w-full bg-white text-black py-3 rounded-xl font-bold hover:bg-gray-200 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg"
+                  >
+                    <Share className="w-4 h-4" />
+                    Share on Warpcast
+                  </button>
+                  
+                  <button
+                    onClick={generateIdentity}
+                    className="w-full bg-slate-800 text-slate-300 py-3 rounded-xl font-bold hover:bg-slate-700 transition-all"
+                  >
+                    Spin Again 🔄
+                  </button>
+                </div>
+              )}
+            
+            </div>
+
           </div>
         </div>
       )}
 
     </div>
   );
-}
+               }
